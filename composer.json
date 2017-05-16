@@ -1,0 +1,32 @@
+{
+    "name": "weareenvoy/craft-greenhouse-plugin",
+    "description": "Plugin to connect CraftCMS 3 with Greenhouse Careers",
+    "type": "craft-plugin",
+    "authors": [
+        {
+            "name": "Jeff Rupert",
+            "email": "jrupert@weareenvoy.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Weareenvoy\\CraftGreenhouse\\": "src/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-beta.17",
+        "grnhse/greenhouse-tools-php": "~1.0"
+    },
+    "extra": {
+        "handle": "greenhouse",
+        "name": "Craft Greenhouse Plugin",
+        "developer": "We Are Envoy",
+        "developerUrl": "https://www.weareenvoy.com"
+    }
+}
