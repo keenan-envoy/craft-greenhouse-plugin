@@ -11,7 +11,8 @@ use craft\events\RegisterUrlRulesEvent;
 use craft\events\SetElementRouteEvent;
 use craft\web\UrlManager;
 use Greenhouse\GreenhouseToolsPhp\GreenhouseService;
-use Weareenvoy\CraftGreenhouse\Models\Settings;
+use Weareenvoy\CraftGreenhouse\models\Settings;
+use Weareenvoy\CraftGreenhouse\services\Greenhouse;
 use yii\base\Event;
 use yii\di\Container;
 
@@ -23,6 +24,7 @@ class Plugin extends BasePlugin implements PluginInterface
 
         $this->initGreenhouse();
         $this->initRoutes();
+        $this->initServices();
     }
 
     protected function createSettingsModel()
@@ -70,15 +72,22 @@ class Plugin extends BasePlugin implements PluginInterface
             $entry = $event->sender;
 
             if ($urlBase === $entry->slug) {
-                $event->route   = ['greenhouse/listing/index', compact('entry')];
+                $event->route   = ['greenhouse/main/index', compact('entry')];
                 $event->handled = true;
             }
         });
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES, function (RegisterUrlRulesEvent $event) use ($urlBase) {
-            $event->rules[$urlBase . '/<career:.+>'] = 'greenhouse/show/index';
+            $event->rules[$urlBase . '/<career:[^/]+>/apply'] = 'greenhouse/main/apply';
+            $event->rules[$urlBase . '/<career:[^/]+>'] = 'greenhouse/main/show';
             //$event->rules[$urlBase . '/career-detail'] = 'greenhouse/show/index';
         });
+    }
 
+    private function initServices()
+    {
+        $this->setComponents([
+            'greenhouse' => Greenhouse::class,
+        ]);
     }
 }

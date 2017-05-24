@@ -1,6 +1,6 @@
 <?php
 
-namespace Weareenvoy\CraftGreenhouse\Models;
+namespace Weareenvoy\CraftGreenhouse\models;
 
 use craft\base\Model;
 
