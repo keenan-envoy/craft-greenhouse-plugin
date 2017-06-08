@@ -86,11 +86,11 @@ class MainController extends Controller
         try {
             $this->greenhouse->applyToJob($job, $request);
 
-            $session->addFlash('applicationSuccess', 'Application submitted successfully!');
+            $session->setFlash('applicationSuccess', 'Application submitted successfully!');
 
             return $this->redirect($referrerUrl);
         } catch (GreenhousePluginException $e) {
-            $session->addFlash('applicationErrors', $e->getErrorMessages());
+            $session->setFlash('applicationErrors', $e->getErrorMessages());
 
             return $this->redirect($referrerUrl . '#apply');
         }

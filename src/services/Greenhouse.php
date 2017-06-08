@@ -296,6 +296,10 @@ class Greenhouse extends Component
                 return 'Invalid phone number.';
             }
 
+            if ('resume' === $key && ! $this->isValidResume($value)) {
+                return 'Invalid resume file.';
+            }
+
             return '';
         })->filter();
 
@@ -322,6 +326,15 @@ class Greenhouse extends Component
     private function isValidPhone(string $phone)
     {
         return 10 <= strlen(preg_replace(';\D;', '', $phone));
+    }
+
+    private function isValidResume(\CURLFile $resume)
+    {
+        return in_array($resume->getMimeType(), [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ]);
     }
 
     /**
