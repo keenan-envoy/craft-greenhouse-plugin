@@ -120,33 +120,6 @@ class Greenhouse extends Component
     }
 
     /**
-     * @param array   $job
-     * @param Request $request
-     *
-     * @return bool
-     * @throws GreenhousePluginException
-     */
-    public function applyToJob(array $job, Request $request)
-    {
-        /** @var \Greenhouse\GreenhouseToolsPhp\Services\ApplicationService $appService */
-        $appService = \Craft::$container->get('ghApps');
-
-        $data = $this->getApplicationData($job, $request);
-
-        try {
-            $this->validateApplication($data, $job, $request);
-
-            return $appService->postApplication($data->toArray());
-        } catch (GreenhouseApplicationException $e) {
-            // Missing required field
-            // this should never be hit, unless GH changes their API
-            throw new GreenhousePluginException([$e->getMessage()], $e->getMessage(), $e->getCode(), $e);
-        } catch (GreenhouseAPIResponseException $e) {
-            throw new GreenhousePluginException([$e->getMessage()], $e->getMessage(), $e->getCode(), $e);
-        }
-    }
-
-    /**
      * @param array  $arr
      * @param string $key
      *
@@ -261,47 +234,69 @@ class Greenhouse extends Component
      * @param array   $job
      * @param Request $request
      *
+     * @return bool
+     * @throws GreenhousePluginException
+     */
+    public function applyToJob(array $job, Request $request)
+    {
+        /** @var \Greenhouse\GreenhouseToolsPhp\Services\ApplicationService $appService */
+        $appService = \Craft::$container->get('ghApps');
+
+        $data = $this->getApplicationData($request);
+
+        try {
+            $this->validateApplication($data);
+
+            return $appService->postApplication($this->translateDataForApi($data, $job));
+        } catch (GreenhouseApplicationException $e) {
+            // Missing required field
+            // this should never be hit, unless GH changes their API
+            throw new GreenhousePluginException([$e->getMessage()], $e->getMessage(), $e->getCode(), $e);
+        } catch (GreenhouseAPIResponseException $e) {
+            throw new GreenhousePluginException([$e->getMessage()], $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * @param Request $request
+     *
      * @return Collection
      */
-    private function getApplicationData(array $job, Request $request): Collection
+    private function getApplicationData(Request $request): Collection
     {
-        // really bad way to translate the field values into a legit source.
-        $translation = $this->getKeyTranslations($job, $request);
-
-        $data = $translation->mapWithKeys(function ($name) use ($job, $request) {
-            if (is_callable($name)) {
-                return $name($job, $request);
-            }
-
-            if (is_array($name)) {
-                if (is_callable($name['value'])) {
-                    return $name['value']($job, $request);
-                }
-
-                return [$name['key'] => $name['value']];
-            }
-
-            return [$name => $request->getBodyParam($name)];
-        });
-
-        $data['id'] = $job['id'];
-
-        return $data;
+        return collect([
+            'first_name' => $request->getBodyParam('first_name'),
+            'last_name'  => $request->getBodyParam('last_name'),
+            'email'      => $request->getBodyParam('email'),
+            'phone'      => $request->getBodyParam('phone'),
+            'resume'     => new \CURLFile($_FILES['resume']['tmp_name'], $_FILES['resume']['type'], 'resume'),
+            'linkedin'   => $request->getBodyParam('linkedin'),
+            'website'    => $request->getBodyParam('website'),
+            'hear_about' => $request->getBodyParam('hear_about'),
+        ]);
     }
 
     /**
      * @param Collection $data
-     * @param array      $job
-     * @param Request    $request
      *
      * @throws GreenhousePluginException
      */
-    private function validateApplication(Collection $data, array $job, Request $request)
+    private function validateApplication(Collection $data)
     {
-        $errors = $data->mapWithKeys(function ($value, $key) use ($job, $request) {
-            $translatedKey   = $this->translateKey($key, $job);
+        $errors = $data->map(function ($value, $key) {
+            if (empty($value)) {
+                return 'Required.';
+            }
 
-            return [$key => $this->validateField($translatedKey, $value)];
+            if ('email' === $key && ! $this->isValidEmail($value)) {
+                return 'Invalid email address.';
+            }
+
+            if ('phone' === $key && ! $this->isValidPhone($value)) {
+                return 'Invalid phone number.';
+            }
+
+            return '';
         })->filter();
 
         if (0 < $errors->count()) {
@@ -309,6 +304,49 @@ class Greenhouse extends Component
         }
     }
 
+    /**
+     * @param string $email
+     *
+     * @return bool
+     */
+    private function isValidEmail(string $email): bool
+    {
+        return (bool)filter_var($email, FILTER_VALIDATE_EMAIL);
+    }
+
+    /**
+     * @param string $phone
+     *
+     * @return bool
+     */
+    private function isValidPhone(string $phone)
+    {
+        return 10 <= strlen(preg_replace(';\D;', '', $phone));
+    }
+
+    /**
+     * @param Collection $data
+     * @param array      $job
+     *
+     * @return array
+     */
+    private function translateDataForApi(Collection $data, array $job): array
+    {
+        return $data->mapWithKeys(function ($value, $key) use ($job) {
+            if ('phone' === $key) {
+                $value = substr($value, 0, 3) . ' ' . substr($value, 3, 3) . ' ' . substr($value, 6);
+            }
+
+            return [$this->translateKey($key, $job) => $value];
+        })->put('id', $job['id'])->toArray();
+    }
+
+    /**
+     * @param string $key
+     * @param array  $job
+     *
+     * @return string
+     */
     private function translateKey(string $key, array $job): string
     {
         $translations = $this->getKeyTranslations();
@@ -324,44 +362,7 @@ class Greenhouse extends Component
         return $key;
     }
 
-    private function getValue(string $key, Request $request, $default = null)
-    {
-        $valueTranslations = $this->getValueTranslations($request);
-
-        if ($valueTranslations->has($key)) {
-            return $valueTranslations[$key];
-        }
-
-        return $default;
-    }
-
     /**
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return bool|string
-     */
-    private function validateField($key, $value)
-    {
-        $translations = $this->getLabels();
-        $required     = [
-            'first_name',
-            'last_name',
-            'email',
-            'phone',
-            'resume',
-            ''
-        ];
-
-        if (in_array($key, $required) && empty($value)) {
-            return $translations[$key] . ' is required.';
-        }
-
-        return false;
-    }
-
-    /**
-     *
      * @return Collection
      */
     private function getKeyTranslations(): Collection
@@ -387,37 +388,6 @@ class Greenhouse extends Component
                     return 'How did you hear about this job?' === $question['label'];
                 }))[0]['fields'][0]['name'];
             },
-        ]);
-    }
-
-    private function getValueTranslations(Request $request): Collection
-    {
-        return collect([
-            'first_name' => $request->getBodyParam('first_name'),
-            'last_name'  => $request->getBodyParam('last_name'),
-            'email'      => $request->getBodyParam('email'),
-            'phone'      => $request->getBodyParam('phone'),
-            'resume'     => new \CURLFile($_FILES['resume']['name'], $_FILES['resume']['type'], 'resume'),
-            'linkedin'   => $request->getBodyParam('linkedin'),
-            'website'    => $request->getBodyParam('website'),
-            'hear_about' => $request->getBodyParam('hear_about'),
-        ]);
-    }
-
-    /**
-     * @return Collection
-     */
-    private function getLabels(): Collection
-    {
-        return collect([
-            'first_name' => 'First Name',
-            'last_name'  => 'Last Name',
-            'email'      => 'Email',
-            'phone'      => 'Phone',
-            'resume'     => 'Resume',
-            'linkedin'   => 'LinkedIn Profile',
-            'website'    => 'Website',
-            'hear_about' => 'How did you hear about this job?',
         ]);
     }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "f2b32fbb617352ce0db57d20599ca44b",
+    "content-hash": "66aaaf5aa6edab581abce87989c1367d",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -286,16 +286,16 @@
         },
         {
             "name": "bower-asset/timepicker",
-            "version": "1.11.10",
+            "version": "1.11.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jonthornton/jquery-timepicker.git",
-                "reference": "3aa2e806667e2b354436a490658914e1d50c6dc2"
+                "reference": "3f26316a6f417c77737488d763e9a9055c20d8ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jonthornton/jquery-timepicker/zipball/3aa2e806667e2b354436a490658914e1d50c6dc2",
-                "reference": "3aa2e806667e2b354436a490658914e1d50c6dc2",
+                "url": "https://api.github.com/repos/jonthornton/jquery-timepicker/zipball/3f26316a6f417c77737488d763e9a9055c20d8ae",
+                "reference": "3f26316a6f417c77737488d763e9a9055c20d8ae",
                 "shasum": null
             },
             "require": {
@@ -400,16 +400,16 @@
         },
         {
             "name": "craftcms/cms",
-            "version": "3.0.0-beta.17",
+            "version": "3.0.0-beta.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/craftcms/cms.git",
-                "reference": "534551073a1138ddfad2d2f3bd828621a36fdda4"
+                "reference": "9b033728f5ee4db441acf5d79043b727bab9e625"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/craftcms/cms/zipball/534551073a1138ddfad2d2f3bd828621a36fdda4",
-                "reference": "534551073a1138ddfad2d2f3bd828621a36fdda4",
+                "url": "https://api.github.com/repos/craftcms/cms/zipball/9b033728f5ee4db441acf5d79043b727bab9e625",
+                "reference": "9b033728f5ee4db441acf5d79043b727bab9e625",
                 "shasum": ""
             },
             "require": {
@@ -422,7 +422,7 @@
                 "bower-asset/jquery.payment": "~3.0.0",
                 "bower-asset/picturefill": "~3.0.2",
                 "bower-asset/selectize": "~0.12.4",
-                "bower-asset/timepicker": "~1.11.9",
+                "bower-asset/timepicker": "~1.11.11",
                 "bower-asset/velocity": "~1.5.0",
                 "craftcms/server-check": "~1.0.13",
                 "creocoder/yii2-nested-sets": "~0.9.0",
@@ -465,7 +465,7 @@
                 "craftcms",
                 "yii2"
             ],
-            "time": "2017-05-13T23:00:31+00:00"
+            "time": "2017-05-31T23:35:53+00:00"
         },
         {
             "name": "craftcms/server-check",
@@ -599,16 +599,16 @@
         },
         {
             "name": "ezyang/htmlpurifier",
-            "version": "v4.9.2",
+            "version": "v4.9.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ezyang/htmlpurifier.git",
-                "reference": "6d50e5282afdfdfc3e0ff6d192aff56c5629b3d4"
+                "reference": "95e1bae3182efc0f3422896a3236e991049dac69"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ezyang/htmlpurifier/zipball/6d50e5282afdfdfc3e0ff6d192aff56c5629b3d4",
-                "reference": "6d50e5282afdfdfc3e0ff6d192aff56c5629b3d4",
+                "url": "https://api.github.com/repos/ezyang/htmlpurifier/zipball/95e1bae3182efc0f3422896a3236e991049dac69",
+                "reference": "95e1bae3182efc0f3422896a3236e991049dac69",
                 "shasum": ""
             },
             "require": {
@@ -642,7 +642,7 @@
             "keywords": [
                 "html"
             ],
-            "time": "2017-03-13T06:30:53+00:00"
+            "time": "2017-06-03T02:28:16+00:00"
         },
         {
             "name": "grnhse/greenhouse-tools-php",

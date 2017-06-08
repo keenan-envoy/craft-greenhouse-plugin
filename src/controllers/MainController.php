@@ -60,8 +60,16 @@ class MainController extends Controller
         $entry    = $this->greenhouse->getCareerDetailEntry();
         $template = $this->greenhouse->getTemplateFromEntry($entry);
         $job      = $this->greenhouse->getJobFromId($this->getJobId());
+        $messages = [];
+        $session = \Craft::$app->getSession();
+        if ($session->hasFlash('applicationSuccess')) {
+            $messages['success'] = $session->getFlash('applicationSuccess');
+        }
+        if ($session->hasFlash('applicationErrors')) {
+            $messages['errors'] = $session->getFlash('applicationErrors');
+        }
 
-        return $this->renderTemplate($template, compact('entry', 'job'));
+        return $this->renderTemplate($template, compact('entry', 'job', 'messages'));
     }
 
     /**
@@ -73,21 +81,18 @@ class MainController extends Controller
         $job = $this->greenhouse->getJobFromId($this->getJobId(), true);
 
         $request = \Craft::$app->request;
+        $session = \Craft::$app->getSession();
+        $referrerUrl = \Craft::$app->request->getReferrer();
         try {
             $this->greenhouse->applyToJob($job, $request);
 
-            var_dump('success');die;
+            $session->addFlash('applicationSuccess', 'Application submitted successfully!');
 
-            return $this->redirect(\Craft::$app->request->getUrl());
+            return $this->redirect($referrerUrl);
         } catch (GreenhousePluginException $e) {
-            var_dump($e);die;
-            $session = \Craft::$app->getSession();
             $session->addFlash('applicationErrors', $e->getErrorMessages());
 
-            $url = $request->getSegments();
-            array_pop($url);
-
-            return $this->redirect(implode('/', $url) . '#apply');
+            return $this->redirect($referrerUrl . '#apply');
         }
     }
 
