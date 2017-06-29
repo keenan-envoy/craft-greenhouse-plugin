@@ -19,6 +19,9 @@ use yii\base\Component;
  */
 class Greenhouse extends Component
 {
+    /* Used for optional Fields */
+    protected $_optional = ["linkedin", "website", "hear_about"];
+    
     /**
      * @param Entry $entry
      *
@@ -284,7 +287,7 @@ class Greenhouse extends Component
     private function validateApplication(Collection $data)
     {
         $errors = $data->map(function ($value, $key) {
-            if (empty($value)) {
+            if (empty($value) && !in_array($key, $this->_optional)) {
                 return 'Required.';
             }
 
