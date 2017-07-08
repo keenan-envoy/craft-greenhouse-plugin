@@ -88,7 +88,7 @@ class MainController extends Controller
 
             $session->setFlash('applicationSuccess', 'Application submitted successfully!');
 
-            return $this->redirect($referrerUrl);
+            return $this->redirect($referrerUrl . '#apply');
         } catch (GreenhousePluginException $e) {
             $session->setFlash('applicationErrors', $e->getErrorMessages());
 
